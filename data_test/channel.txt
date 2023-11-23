@@ -1,0 +1,12 @@
+{'etag': 'MwZYbH-eu9eLVq_d3yYWGyMx9b8',
+ 'items': [{'contentDetails': {'relatedPlaylists': {'likes': '',
+                                                    'uploads': 'UUaIrY40rwEf51POKMybW-Eg'}},
+            'etag': 'j_tcFch_Vy2oKXmZNny3-bsabxE',
+            'id': 'UCaIrY40rwEf51POKMybW-Eg',
+            'kind': 'youtube#channel',
+            'statistics': {'hiddenSubscriberCount': False,
+                           'subscriberCount': '15900',
+                           'videoCount': '222',
+                           'viewCount': '606884'}}],
+ 'kind': 'youtube#channelListResponse',
+ 'pageInfo': {'resultsPerPage': 5, 'totalResults': 1}}
