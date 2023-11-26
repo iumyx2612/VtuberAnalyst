@@ -25,4 +25,6 @@ class YTService:
         response = request.execute()
         channel_id = response['items'][0]['id']['channelId']
 
-        return channel_id
+        return channel_id #append thành list
+    
+    #viết
