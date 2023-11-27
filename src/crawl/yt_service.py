@@ -1,18 +1,20 @@
+from typing import List
 from googleapiclient.http import HttpRequest
 
 from googleapiclient.discovery import build
+
+import logging
+logging.basicConfig(level=logging.INFO)
 
 from .utils import correct_channel_name
 
 
 class YTService:
     def __init__(self,
-                 developer_key: str,
-                 max_result: int = 5):
+                 developer_key: str):
         self.service = build(
             'youtube', 'v3', developerKey=developer_key
         )
-        self.max_result = max_result
 
     def get_channelID_from_name(self, name: str) -> str:
         name = correct_channel_name(name)
@@ -20,9 +22,40 @@ class YTService:
             q=name,
             part='id',
             type='channel',
-            maxResults=1
+            maxResults=1,
+            fields='items(id(channelId))'
         )
         response = request.execute()
         channel_id = response['items'][0]['id']['channelId']
 
         return channel_id
+
+    def get_all_streamIDs_from_channelID(self, channelID: str) -> List[str]:
+        stream_ids = []
+        page_token = ""
+        while True:
+            request: HttpRequest = self.service.search().list(
+                part='id',
+                channelId=channelID,
+                maxResults=50,
+                order="date",
+                type="video",
+                eventType="completed",
+                pageToken=page_token
+            )
+            response = request.execute()
+            current_stream_ids = [item['id']['videoId'] for item in response['items']]
+            stream_ids.extend(current_stream_ids)
+
+            num_results = len(response['items'])
+            logging.info(f"Found {num_results} streams on page token {page_token}")
+
+            if 'nextPageToken' in response.keys():
+                page_token = response['nextPageToken']
+            else:
+                break
+
+        num_streams = len(stream_ids)
+        logging.info(f"Found {num_streams} streams from channel {channelID}")
+
+        return stream_ids
