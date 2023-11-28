@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from googleapiclient.http import HttpRequest
 
 from googleapiclient.discovery import build
@@ -59,3 +59,18 @@ class YTService:
         logging.info(f"Found {num_streams} streams from channel {channelID}")
 
         return stream_ids
+
+    def get_video_info_from_videoIDs(
+            self,
+            video_ids: Union[str, List[str]],
+            infos: List[str] = ['snippet', 'statistics', 'contentDetails',
+                                'liveStreamingDetails', 'topicDetails']) -> dict:
+        part = ",".join(info for info in infos)
+        if isinstance(video_ids, list):
+            video_ids = ",".join(video_id for video_id in video_ids)
+        request: HttpRequest = self.service.videos().list(
+            part=part,
+            id=video_ids
+        )
+        response = request.execute()
+        return response
