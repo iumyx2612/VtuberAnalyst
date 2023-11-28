@@ -30,13 +30,13 @@ class YTService:
 
         return channel_id
 
-    def get_all_streamIDs_from_channelID(self, channelID: str) -> List[str]:
+    def get_all_streamIDs_from_channelID(self, channel_id: str) -> List[str]:
         stream_ids = []
         page_token = ""
         while True:
             request: HttpRequest = self.service.search().list(
                 part='id',
-                channelId=channelID,
+                channelId=channel_id,
                 maxResults=50,
                 order="date",
                 type="video",
@@ -56,7 +56,7 @@ class YTService:
                 break
 
         num_streams = len(stream_ids)
-        logging.info(f"Found {num_streams} streams from channel {channelID}")
+        logging.info(f"Found {num_streams} streams from channel {channel_id}")
 
         return stream_ids
 
