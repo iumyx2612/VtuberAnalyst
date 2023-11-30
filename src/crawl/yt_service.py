@@ -15,8 +15,9 @@ class YTService:
         self.service = build(
             'youtube', 'v3', developerKey=developer_key
         )
+        self.yt_chat = None
 
-    def get_channelID_from_name(self, name: str) -> str:
+    def get_channel_id_from_name(self, name: str) -> str:
         name = correct_channel_name(name)
         request: HttpRequest = self.service.search().list(
             q=name,
@@ -30,7 +31,7 @@ class YTService:
 
         return channel_id
 
-    def get_all_streamIDs_from_channelID(self, channel_id: str) -> List[str]:
+    def get_all_streamIDs_from_channel_id(self, channel_id: str) -> List[str]:
         stream_ids = []
         page_token = ""
         while True:
@@ -60,7 +61,7 @@ class YTService:
 
         return stream_ids
 
-    def get_video_info_from_videoIDs(
+    def get_video_info_from_video_ids(
             self,
             video_ids: Union[str, List[str]],
             infos: List[str] = ['snippet', 'statistics', 'contentDetails',
