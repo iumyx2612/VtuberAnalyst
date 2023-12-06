@@ -1,4 +1,7 @@
-from typing import Optional
+from typing import Optional, List
+
+from tqdm import tqdm
+import re
 
 from chat_downloader.sites.common import Chat as BaseChat
 from chat_downloader.sites import YouTubeChatDownloader
@@ -32,7 +35,7 @@ class YTChat(YouTubeChatDownloader):
 
     def get_chat_by_video_id(self,
                              video_id,
-                             params: Optional[dict] = None) -> str:
+                             params: Optional[dict] = None) -> List[dict]:
         """Get chat messages for a YouTube video, given its ID.
 
         :param video_id: YouTube video ID
@@ -52,11 +55,51 @@ class YTChat(YouTubeChatDownloader):
             **initial_info
         )
 
-        text_out = []
-        for mess in chat_object:
+        chat_infos = []
+        for mess in tqdm(chat_object, desc=f"Getting chat from {video_id}"):
             text = chat_object.format(mess)
             text = replace_emoji_in_string(text)
-            text_out.append(text)
+            chat_info = self._text_to_chat_data(text)
+            if chat_info:
+                chat_infos.append(chat_info)
 
-        text_out = "\n".join([txt for txt in text_out])
-        return text_out
+        return chat_infos
+
+    def _text_to_chat_data(self, line: str) -> dict:
+        """
+        Parse the text to a dict with specified fields
+        """
+        timestamp_pattern = re.compile(
+            r'(?P<timestamp>-?(\d+:)?\d+:\d+) \|'
+        )
+        timestamp_match = re.match(timestamp_pattern, line)
+        timestamp = None
+        if timestamp_match:
+            timestamp = timestamp_match.group("timestamp")
+
+        mbs_match = re.search(r'\((New\s+member)|(Member\s*\(\d+\s*((years?)|(months?))\))\)', line)
+        mbs_status = "Not Member"
+        if mbs_match:
+            mbs_status = mbs_match.group().strip()
+            # Cuz regex sux
+            if mbs_status[0] == "(":
+                mbs_status = mbs_status[1:]
+            if mbs_status[-1] == ")":
+                mbs_status = mbs_status[:-1]
+
+        account_line = line.split('|')[1]
+        account_line = re.sub(
+            r"\((New\s+member)|(Member\s*\(\d+\s*((years?)|(months?))\))\)",
+            '', account_line)
+        account_line = re.sub(r"\(|\)", '', account_line)
+        yt_account = account_line.strip().split(':')[0]
+        chat_content = account_line.strip().split(':')[1]
+
+        data_dict = {
+            "timestamp": timestamp if timestamp else "N/A",
+            "mbs_status": mbs_status,
+            "yt_account": yt_account,
+            "chat_content": chat_content
+        }
+
+        return data_dict
