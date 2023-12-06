@@ -44,7 +44,7 @@ def parse_iso_datetime(iso_datetime: str) -> str:
 
 
 def replace_emoji_in_string(string: str, tag: str = "<emoji>") -> str:
-    emoji_pattern = re.compile(r':[a-zA-Z0-9-]+:')
+    emoji_pattern = re.compile(r':[a-zA-Z_][a-zA-Z0-9_-]*:')
     modified_string = re.sub(emoji_pattern, tag, string)
     return modified_string
 
