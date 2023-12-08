@@ -31,6 +31,19 @@ class YTService:
 
         return channel_id
 
+    def channel_info_from_channel_id(self, channel_id: str) -> dict:
+        request: HttpRequest = self.service.channels().list(
+            part='brandingSettings, snippet, statistics',
+            id=channel_id,
+            fields='items('
+                   'snippet(thumbnails(high)),'
+                   'brandingSettings(channel(title,unsubscribedTrailer,country), image(bannerExternalUrl)),'
+                   'statistics)'
+        )
+        response = request.execute()
+
+        return response
+
     def get_all_streamIDs_from_channel_id(self, channel_id: str) -> List[str]:
         stream_ids = []
         page_token = ""
